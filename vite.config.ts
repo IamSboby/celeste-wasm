@@ -27,7 +27,19 @@ let analyticsTagPlugin = () =>
 	}) satisfies Plugin;
 
 export default defineConfig({
-	plugins: [dreamlandPlugin(), analyticsTagPlugin()],
+	plugins: [dreamlandPlugin(), analyticsTagPlugin(), {
+		name: "google-auth-popup-headers",
+		configureServer(server) {
+			server.middlewares.use((req,res,next)=>{
+				if (/\/drive-auth\.(html|js)(\?|$)/.test(req.url || "")) {
+					res.setHeader("Cross-Origin-Opener-Policy","same-origin-allow-popups");
+					res.setHeader("Cross-Origin-Embedder-Policy","unsafe-none");
+				}
+				next();
+			});
+		}
+	}],
+	envDir: ".",
 	root: "./frontend",
 	base: "./",
 	server: {

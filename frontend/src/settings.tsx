@@ -1,4 +1,5 @@
 import { Switch } from "./ui/Switch";
+import { CloudPanel } from "./cloud/ui";
 import { store } from "./store";
 import { TextField } from "./ui/TextField";
 import { analyticsEnabled, event } from "./analytics";
@@ -37,6 +38,7 @@ export const Settings: Component<
 
 	return (
 		<div>
+			<CloudPanel />
 			<Switch
 				title="Dark Mode"
 				bind:on={use(this.darkMode)}

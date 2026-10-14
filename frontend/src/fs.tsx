@@ -1,4 +1,5 @@
 import { Button, Icon } from "./ui/Button";
+import { profileLease, profilePath } from "./cloud/profile";
 
 import tar, { Headers as TarHeaders, Pack } from "tar-stream";
 import {
@@ -47,7 +48,10 @@ export const PICKERS_UNAVAILABLE: boolean | "security" =
 			? "security"
 			: false;
 
-export const rootFolder = await navigator.storage.getDirectory();
+await profileLease;
+let selectedRoot = await navigator.storage.getDirectory();
+for (const part of profilePath.split("/").filter(Boolean)) selectedRoot = await selectedRoot.getDirectoryHandle(part, {create:true});
+export const rootFolder = selectedRoot;
 
 export const TAR_TYPES = [
 	{

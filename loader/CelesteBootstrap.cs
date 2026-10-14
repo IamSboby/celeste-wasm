@@ -15,7 +15,7 @@ struct Dll
 public static partial class CelesteBootstrap
 {
     [DllImport("Emscripten")]
-    public extern static int mount_opfs();
+    public extern static int mount_opfs(string profile);
     [DllImport("Emscripten")]
     public extern static int mount_fetch(string srcdir, string dstdir);
     [DllImport("Emscripten")]
@@ -50,11 +50,13 @@ public static partial class CelesteBootstrap
     }
 
     [JSExport]
-    public static async Task MountFilesystems(string root, string[] rawDlls)
+    public static async Task MountFilesystems(string root, string[] rawDlls, string profile)
     {
         try
         {
-            int ret = mount_opfs();
+            if (profile != "" && !System.Text.RegularExpressions.Regex.IsMatch(profile, @"^\.cloud-profiles/[a-zA-Z0-9-]+$"))
+                throw new ArgumentException("Invalid OPFS profile");
+            int ret = mount_opfs(profile);
             if (ret != 0)
             {
                 throw new Exception($"Failed to mount OPFS: error code {ret}");
@@ -71,6 +73,7 @@ public static partial class CelesteBootstrap
         catch (Exception err)
         {
             Console.WriteLine(err);
+            throw;
         }
     }
 }

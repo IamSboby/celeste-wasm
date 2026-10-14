@@ -2,6 +2,13 @@
 
 <h1>Webleste</h1>
 
+This fork adds **optional Google Drive synchronization**, alongside the original
+local installation and archive flows. Gameplay still runs entirely on OPFS.
+See [setup, architecture, recovery, testing and deployment](docs/GOOGLE_DRIVE.md).
+
+Upstream: [MercuryWorkshop/celeste-wasm](https://github.com/MercuryWorkshop/celeste-wasm),
+based on `threads-v2`. Development branch: `feature/google-drive-sync`.
+
 <br>
 
 A mostly-complete port of Celeste (2018) to WebAssembly, with full support for Everest mods. Powered by [FNA-WASM-Build](https://github.com/r58playz/FNA-WASM-Build) and [MonoMod.WASM](https://github.com/r58Playz/MonoMod).
