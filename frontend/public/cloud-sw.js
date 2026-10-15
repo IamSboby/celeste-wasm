@@ -1,11 +1,31 @@
 const CACHE = 'webleste-shell-__BUILD_ID__';
 const ASSETS = /*PRECACHE*/[];
+let completed = 0;
+let installError;
+async function reportInstall() {
+  const clients = await self.clients.matchAll({includeUncontrolled:true});
+  for (const client of clients) client.postMessage({type:'offline-install',completed,total:ASSETS.length,error:installError});
+}
+self.addEventListener('message', event => {
+  if (event.data?.type === 'offline-install-status') event.waitUntil(reportInstall());
+});
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
   // A failed fetch fails installation; never claim an incomplete shell is offline-ready.
   let next = 0;
   await Promise.all(Array.from({length:3}, async () => {
-    while (next < ASSETS.length) { const url = ASSETS[next++]; await cache.add(new Request(url,{cache:'reload'})); }
+    while (next < ASSETS.length) {
+      const url = ASSETS[next++];
+      try {
+        await cache.add(new Request(url,{cache:'reload'}));
+        completed++;
+        await reportInstall();
+      } catch (error) {
+        installError = `${url}: ${error.message}`;
+        await reportInstall();
+        throw error;
+      }
+    }
   }));
   await self.skipWaiting();
 })()));
