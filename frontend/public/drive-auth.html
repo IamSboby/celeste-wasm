@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connect Google Drive — Celeste</title>
+<style>body{font:18px system-ui;background:#171b29;color:#fff;max-width:32em;margin:3em auto;padding:1em}button{font:inherit;padding:1em;border-radius:1em;cursor:pointer}p{line-height:1.5}</style>
+<h1>Connect Google Drive</h1>
+<p>Choose the Google account containing your Celeste installation. Drive access is needed to read existing folders and save progress. Celeste runs locally.</p>
+<button id="connect" disabled>Continue with Google</button><p id="status">Loading Google Identity Services…</p>
+<script src="drive-auth.js" defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.gisReady?.()"></script>
+</html>

@@ -1,0 +1,57 @@
+name: Deploy Cloud Edition to GitHub Pages
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/google-drive-sync]
+permissions:
+  contents: read
+concurrency:
+  group: cloud-pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/nuget
+      VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+            9.0.x
+            8.0.x
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: sudo apt-get update && sudo apt-get install -y mono-devel
+      - name: Build runtime and frontend
+        run: |
+          make deps
+          (cd loader && dotnet workload restore --configfile "$GITHUB_WORKSPACE/nuget.config")
+          make publish DOTNETFLAGS="--nodereuse:false -v minimal -p:RestoreConfigFile=$GITHUB_WORKSPACE/nuget.config"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

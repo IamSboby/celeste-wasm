@@ -5,10 +5,14 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int mount_opfs() {
+int mount_opfs(const char *profile) {
 	backend_t opfs = wasmfs_create_opfs_backend();
-	int ret = wasmfs_create_directory("/libsdl", 0777, opfs);
-	return ret;
+	if (!profile || !profile[0]) return wasmfs_create_directory("/libsdl", 0777, opfs);
+	int ret = wasmfs_create_directory("/opfs", 0777, opfs);
+	if (ret != 0) return ret;
+	char target[256];
+	snprintf(target, sizeof(target), "/opfs/%s", profile);
+	return symlink(target, "/libsdl");
 }
 
 backend_t fetch_backend = NULL;

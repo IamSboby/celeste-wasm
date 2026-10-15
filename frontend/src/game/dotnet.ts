@@ -1,3 +1,5 @@
+import { profilePath } from "../cloud/profile";
+import { beforePlay, afterPlay, cloud } from "../cloud/controller";
 import { DotnetHostBuilder, MonoConfig } from "./dotnetdefs";
 import { calculateXXH64, recursiveGetDirectory, rootFolder } from "../fs";
 import { SteamJS } from "../achievements";
@@ -398,7 +400,8 @@ export async function preInit() {
 	await runtime.runMain();
 	await exports.CelesteBootstrap.MountFilesystems(
 		loc.substring(0, loc.lastIndexOf("/")) + "/",
-		dlls.map((x) => `${x[0]}|${x[1]}`)
+		dlls.map((x) => `${x[0]}|${x[1]}`),
+		profilePath
 	);
 	await exports.CelesteLoader.PreInit();
 	console.debug("dotnet initialized");
@@ -475,6 +478,8 @@ function monitorMem(): () => void {
 }
 
 export async function play() {
+	try { await beforePlay(); } catch (e) { cloud.error = String(e); return; }
+	try {
 	event("play-begin");
 	gameState.playing = true;
 	gameState.initting = true;
@@ -505,4 +510,8 @@ export async function play() {
 	await exports.CelesteLoader.Cleanup();
 	gameState.ready = false;
 	gameState.playing = false;
+	} finally {
+		gameState.playing = false;
+		await afterPlay().catch(e => {cloud.error = String(e);});
+	}
 }

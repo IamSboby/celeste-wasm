@@ -35,7 +35,7 @@
 		<WebAssemblyEnableStreamingResponse>true</WebAssemblyEnableStreamingResponse>
 
 		<!-- MAXIMUM_MEMORY is 4GiB - 1 wasm page (64kib) -->
-		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -sOFFSCREENCANVAS_SUPPORT -sMAXIMUM_MEMORY=4294901760 -sMALLOC=mimalloc</EmccExtraLDFlags>
+		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -sOFFSCREENCANVAS_SUPPORT -sMAXIMUM_MEMORY=4294901760 -sMALLOC=mimalloc --pre-js $(MSBuildProjectDirectory)/cloud-opfs.js</EmccExtraLDFlags>
 		<EmccLinkOptimizationFlag>-O3</EmccLinkOptimizationFlag>
 		<EmccCompileOptimizationFlag>-O3</EmccCompileOptimizationFlag>
 		<EmccEnvironment>web,worker</EmccEnvironment>

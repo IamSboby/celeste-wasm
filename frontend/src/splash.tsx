@@ -35,6 +35,9 @@ import iconSettings from "@ktibow/iconset-material-symbols/settings";
 import { Settings } from "./settings";
 import { Dialog } from "./ui/Dialog";
 import { event } from "./analytics";
+import { CloudPanel } from "./cloud/ui";
+import { binding } from "./cloud/profile";
+import { getState, rpc } from "./cloud/controller";
 
 const validateDirectory = async (directory: FileSystemDirectoryHandle) => {
 	let content;
@@ -149,7 +152,7 @@ const Intro: Component<
 		this.disabled = true;
 		this["on:next"](type);
 	};
-	if (initialHasContent) {
+	if (initialHasContent && !binding) {
 		if (initialIsPatched) {
 			queueMicrotask(() => next("done"));
 		} else {
@@ -939,8 +942,27 @@ export const Splash: Component<
 					<div class="logo">
 						<Logo />
 					</div>
+					<details open={!!binding}>
+						<summary>Google Drive (optional)</summary>
+						<CloudPanel onReady={async () => {
+							const hash = await rpc("prepare");
+							const state = await getState();
+							await rpc("mounted");
+							await this.start();
+							let patched = false;
+							try { patched = (await (await rootFolder.getFileHandle("CustomCeleste.dll")).getFile()).size > 0; } catch {}
+							if (state.prepared !== hash || !patched) {
+								await PatchCeleste(gameState.hasEverest);
+								await rpc("prepared",{hash});
+								await rpc("sync");
+							}
+							this["on:next"](true);
+						}} />
+					</details>
+					{binding ? <Button type="normal" icon="none" disabled={false} on:click={()=>{localStorage.setItem("webleste-cloud-profile","local");location.reload();}}>Return to local installation</Button> : null}
 					{use(this.next, (x) => {
 						if (x === "intro") {
+							if (binding) return null;
 							return (
 								<Intro
 									on:next={async (x) => {

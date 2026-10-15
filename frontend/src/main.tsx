@@ -8,6 +8,7 @@ import { Achievements } from "./achievements";
 import { ModInstaller } from "./modinstaller";
 import { SteamCloud } from "./steam";
 import { Settings } from "./settings";
+import { CloudIndicator } from "./cloud/ui";
 
 import iconPlayArrow from "@ktibow/iconset-material-symbols/play-arrow";
 import iconFullscreen from "@ktibow/iconset-material-symbols/fullscreen";
@@ -111,6 +112,7 @@ const TopBar: Component<
 		<div>
 			<div class="group">
 				<Logo />
+				<CloudIndicator />
 			</div>
 			<div class="expand" />
 			<div class="group">
