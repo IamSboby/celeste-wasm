@@ -37,7 +37,7 @@ export async function action(fn: () => Promise<void>) {
 export async function connect() {
   await auth.connect();
   cloud.connected = auth.connected; cloud.email = auth.email;
-  if (binding && auth.account === binding.account) { await ready; await rpc("token",{token:auth.getToken(),expiry:Date.now()+50*60*1000}); }
+  if (binding && auth.account === binding.account) { await ready; await rpc("token",{token:auth.getToken(),expiry:auth.expiresAt}); }
   else if (binding) {
     await rpc("token",{token:"",expiry:0});
     cloud.error = "Different Google account: select its folder to open a separate local replica. Previous saves are retained.";

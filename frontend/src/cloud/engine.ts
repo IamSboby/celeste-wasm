@@ -326,8 +326,10 @@ export class SyncEngine {
   async prepareSource() {
     await this.validateOffline();
     // Match upstream's preference for the original unmodified FNA executable.
-    if (await this.local.file("orig/Celeste.exe")) await this.local.copy("orig/Celeste.exe","Celeste.exe");
-    await this.local.write(".ContentExists","");
+    if (!this.mounted) {
+      if (await this.local.file("orig/Celeste.exe")) await this.local.copy("orig/Celeste.exe","Celeste.exe");
+      await this.local.write(".ContentExists","");
+    }
     const source = (await this.local.file("orig/Celeste.exe")) || (await this.local.file("Celeste.dll")) || (await this.local.file("Celeste.exe"));
     if (!source) throw new Error("Missing Celeste assembly");
     return await this.local.hash(source);

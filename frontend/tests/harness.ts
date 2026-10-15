@@ -34,11 +34,19 @@ export async function scenario(name:string) {
   const root=await (await navigator.storage.getDirectory()).getDirectoryHandle(crypto.randomUUID(),{create:true});
   const local=new LocalFileManifest(root);const drive=new MockDrive(local);
   await drive.add('Celeste.exe','FNA assembly fixture');
+  if(name==='mounted-prepare') await drive.add('orig/Celeste.exe','original assembly fixture');
   for(const dir of CONTENT_DIRS)await drive.add(`Content/${dir}/data`,'asset');
   await drive.add('Saves/0.celeste','save-one');
   const make=async(l=local)=>{const e=new SyncEngine(l,drive as any,'account','folder',()=>{});await e.init();return e;};
   let engine=await make();await engine.sync(true,false);
   const read=async(l=local)=> (await l.file('Celeste/Saves/0.celeste'))?.text();
+  if(name==='mounted-prepare'){
+    const source=await engine.prepareSource();
+    await local.write('Celeste.exe','patched runtime assembly');
+    engine.mounted=true;
+    const nextSource=await engine.prepareSource();
+    return {assembly:await (await local.file('Celeste.exe'))!.text(),sameSource:source===nextSource};
+  }
   if(name==='initial-incremental'){
     const count=drive.downloads;await engine.sync(true,false);
     return {ready:engine.state.ready,save:await read(),extraDownloads:drive.downloads-count};

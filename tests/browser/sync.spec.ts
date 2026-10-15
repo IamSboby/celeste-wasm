@@ -13,3 +13,4 @@ test('failed commit reuses uploaded blob',async({page})=>{expect(await run(page,
 test('large files upload in bounded chunks',async({page})=>{const r=await run(page,'large');expect(r.size).toBe(9*1024*1024);expect(r.uploads).toBe(3);expect(r.hash).toBe(r.actual);});
 test('account mismatch fails closed',async({page})=>{const r=await run(page,'account-isolation');expect(r.error).toContain('identity mismatch');expect(r.save).toBe('save-one');});
 test('offline launch rejects corrupt required content',async({page})=>{expect((await run(page,'offline-corruption')).error).toContain('integrity check failed');});
+test('launch preparation preserves the mounted patched assembly',async({page})=>{expect(await run(page,'mounted-prepare')).toEqual({assembly:'patched runtime assembly',sameSource:true});});

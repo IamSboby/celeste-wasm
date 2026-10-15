@@ -1,6 +1,7 @@
 export class GoogleDriveAuth {
   private token = "";
   private expires = 0;
+  get expiresAt() { return this.expires; }
   account = "";
   email = "";
   get connected() { return !!this.token && Date.now() < this.expires; }
