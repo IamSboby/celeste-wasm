@@ -38,8 +38,8 @@ jobs:
       - name: Build runtime and frontend
         run: |
           make deps
-          (cd loader && dotnet workload restore)
-          make publish
+          (cd loader && dotnet workload restore --configfile "$GITHUB_WORKSPACE/nuget.config")
+          make publish DOTNETFLAGS="--nodereuse:false -v minimal -p:RestoreConfigFile=$GITHUB_WORKSPACE/nuget.config"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
