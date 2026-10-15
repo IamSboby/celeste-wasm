@@ -112,7 +112,7 @@ mock remote storage; they contain synthetic data, not game files.
 The complete runtime requires Linux/WSL, Node 22, pnpm 10, .NET 10 (the upstream
 README's .NET 9 reference is stale), Mono and the native dependencies fetched by
 the upstream Makefile. Set `NUGET_PACKAGES` to `<repo>/nuget`, run
-`dotnet workload restore loader`, then `make publish`.
+`make deps`, then `(cd loader && dotnet workload restore)` and `make publish`.
 
 The `pages.yml` workflow tests, builds the runtime and deploys `frontend/dist`
 with GitHub Pages Actions. Configure Pages source as **GitHub Actions**. The
