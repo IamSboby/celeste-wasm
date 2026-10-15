@@ -247,7 +247,7 @@ export class SyncEngine {
         if (pending) { await this.upload(pending); continue; }
         if (baseline?.revision === head.revision) {
           // Hash verification at startup catches corruption even with unchanged metadata.
-          if (!this.state.ready || !settle) {
+          if (!this.mounted && (!this.state.ready || !settle)) {
             const f = await this.local.file(localPath(path));
             if (!head.deleted && (!f || await this.local.hash(f) !== baseline.hash)) downloads.push([path,head]);
           }

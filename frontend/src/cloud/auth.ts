@@ -1,3 +1,5 @@
+// Account verification must never use the game's proxy fallback.
+const nativeFetch = globalThis.fetch.bind(globalThis);
 export class GoogleDriveAuth {
   private token = "";
   private expires = 0;
@@ -29,7 +31,7 @@ export class GoogleDriveAuth {
         if (data.error) { finish(new Error(data.error)); return; }
         if (!data.access_token || !Number.isFinite(Number(data.expires_in))) return;
         try {
-          const response = await fetch("https://www.googleapis.com/drive/v3/about?fields=user", {headers: {Authorization: `Bearer ${data.access_token}`}, redirect: "error"});
+          const response = await nativeFetch("https://www.googleapis.com/drive/v3/about?fields=user", {headers: {Authorization: `Bearer ${data.access_token}`}, redirect: "error"});
           if (!response.ok) throw new Error(`Google account verification failed (${response.status})`);
           const {user} = await response.json();
           this.account = user.permissionId; this.email = user.emailAddress;
