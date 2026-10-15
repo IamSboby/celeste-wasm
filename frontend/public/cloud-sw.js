@@ -17,7 +17,22 @@ self.addEventListener('install', event => event.waitUntil((async () => {
     while (next < ASSETS.length) {
       const url = ASSETS[next++];
       try {
-        await cache.add(new Request(url,{cache:'reload'}));
+        // Cache writes are atomic, so a retry can keep completed downloads.
+        if (!await cache.match(url)) {
+          for (let attempt = 0; ; attempt++) {
+            try {
+              const response = await fetch(new Request(url,{cache:'reload'}));
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              // Buffer one build chunk (at most 20 MiB) before writing: some
+              // browser backends fail Cache.put for large network streams.
+              const bytes = await response.arrayBuffer();
+              await cache.put(url,new Response(bytes,{status:response.status,headers:response.headers}));
+              break;
+            } catch (error) {
+              if (attempt === 2) throw error;
+            }
+          }
+        }
         completed++;
         await reportInstall();
       } catch (error) {

@@ -1,7 +1,9 @@
 async function boot() {
   if (import.meta.env.PROD && "serviceWorker" in navigator) {
+    let installError: string | undefined;
     navigator.serviceWorker.addEventListener("message", event => {
       if (navigator.serviceWorker.controller || event.data?.type !== "offline-install") return;
+      if (event.data.error) installError = event.data.error;
       document.getElementById("app")!.textContent = event.data.error
         ? `Offline preparation failed: ${event.data.error}. Check your connection and reload.`
         : `Preparing offline runtime… ${event.data.completed}/${event.data.total} files downloaded.`;
@@ -14,7 +16,7 @@ async function boot() {
           const worker = registration.installing;
           if (!worker) return;
           worker.addEventListener("statechange", () => {
-            if (worker.state === "redundant") reject(new Error("Offline runtime installation failed"));
+            if (worker.state === "redundant") reject(new Error(installError || "Offline runtime installation failed"));
           });
           worker.postMessage({type:"offline-install-status"});
         };
