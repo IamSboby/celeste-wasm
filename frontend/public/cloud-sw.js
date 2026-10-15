@@ -53,6 +53,11 @@ self.addEventListener('fetch', event => {
   event.respondWith((async()=>{
     const cache = await caches.open(CACHE);
     let response = await cache.match(event.request);
+    // An already open game may still request assets from the previous build.
+    if(!response) response = await caches.match(event.request);
+    // The runtime discovers the end of the split WASM by requesting one extra
+    // numbered chunk. Return its EOF response even with no network connection.
+    if(!response && /\/_framework\/dotnet\.native\.[^/]+\.wasm\d+$/.test(url.pathname)) return new Response(null,{status:404});
     if(!response) response = await fetch(event.request);
     if(!response.ok || response.type === 'opaque') return response;
     const headers = new Headers(response.headers);
