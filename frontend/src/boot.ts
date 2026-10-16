@@ -5,12 +5,12 @@ async function boot() {
       if (navigator.serviceWorker.controller || event.data?.type !== "offline-install") return;
       if (event.data.error) installError = event.data.error;
       document.getElementById("app")!.textContent = event.data.error
-        ? `Offline preparation failed: ${event.data.error}. Check your connection and reload.`
+        ? `Shell preparation failed: ${event.data.error}. Check your connection and reload.`
         : `Preparing offline runtime… ${event.data.completed}/${event.data.total} files downloaded.`;
     });
     const registration = await navigator.serviceWorker.register("./cloud-sw.js");
     if (!navigator.serviceWorker.controller) {
-      document.getElementById("app")!.textContent = "Preparing offline runtime… This first download can take a few minutes.";
+      document.getElementById("app")!.textContent = "Preparing offline runtime… The runtime will download when needed.";
       await new Promise<void>((resolve, reject) => {
         const watch = () => {
           const worker = registration.installing;

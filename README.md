@@ -45,3 +45,7 @@ For a deeper dive into how we made this and [the Terraria web port](https://gith
 
 1. Fix any issues with the hooks
 2. Make a PR!
+
+## Smart Download work in progress
+
+Development includes lazy framework caching and a bounded download scheduler. Game content still requires a complete local replica; room streaming is not enabled. See [implementation status and acceptance gaps](docs/smart-download.md).

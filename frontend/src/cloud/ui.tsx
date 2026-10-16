@@ -28,8 +28,8 @@ export const CloudPanel: Component<{onReady?:()=>Promise<void>},{folders:RemoteF
       <Switch title="Automatic synchronization" bind:on={use(cloud.automatic)} disabled={false} on:change={()=>{localStorage.setItem("cloud-auto",String(cloud.automatic));void rpc("settings",{automatic:cloud.automatic});}} />
     </div> : null}
     <p role="status">{use(cloud.progress,p=>p.status)} — {use(cloud.progress,p=>p.message)}</p>
-    <progress max="100" value={use(cloud.progress,p=>p.total ? 100*p.done/p.total : 0)} />
-    <p class="detail">{use(cloud.progress,p=>`${p.done}/${p.total} files · ${Math.max(0,p.total-p.done)} remaining · ${(p.bytes/1048576).toFixed(1)}/${(p.totalBytes/1048576).toFixed(1)} MiB transferred · ${(p.speed/1048576).toFixed(1)} MiB/s`)}</p>
+    {$if(use(cloud.progress,p=>p.total>0),<progress max="100" value={use(cloud.progress,p=>p.total ? 100*p.done/p.total : 0)} />)}
+    <p class="detail">{use(cloud.progress,p=>p.total ? `${p.done}/${p.total} files · ${Math.max(0,p.total-p.done)} remaining · ${(p.bytes/1048576).toFixed(1)}/${(p.totalBytes/1048576).toFixed(1)} MiB transferred · ${(p.speed/1048576).toFixed(1)} MiB/s` : (p.status==="Syncing" ? "Discovering files; total not yet known." : ""))}</p>
     <p class="detail">{use(cloud.progress,p=>p.current)}</p>
     <p class="detail">Last remote save: {use(cloud.progress,p=>p.lastSync || "None yet")}</p>
     <details><summary>Pending files</summary>{use(cloud.progress,p=>p.pending.map(path=><p class="detail">{path}</p>))}</details>

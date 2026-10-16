@@ -1,3 +1,4 @@
+import { RuntimeOffline } from "./runtime-offline";
 import { Switch } from "./ui/Switch";
 import { CloudPanel } from "./cloud/ui";
 import { store } from "./store";
@@ -39,6 +40,7 @@ export const Settings: Component<
 	return (
 		<div>
 			<CloudPanel />
+            <RuntimeOffline />
 			<Switch
 				title="Dark Mode"
 				bind:on={use(this.darkMode)}
