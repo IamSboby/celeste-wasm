@@ -60,3 +60,20 @@ This is not a gameplay benchmark. The previous full precache requirement was est
 7. Validate local/Drive sources, backtracking, checkpoints, mods, partial/full offline and benchmarks on the same installation.
 
 The requested playable room before 100% installation and room prefetch are **not implemented or verified**. Do not label this branch completed Smart Download.
+
+## Actual installation audit — 2026-10-17
+
+The user's Drive installation became readable through its local mounted filesystem. Static ECMA-335 metadata inspection found references to Microsoft.Xna.Framework, Microsoft.Xna.Framework.Game and Microsoft.Xna.Framework.Graphics, rather than FNA. This is an XNA installation; the port documents and builds against FNA. A compatible installation is needed for representative gameplay validation. No executable was run during inspection.
+
+Read-only inventory: 1,211 Content files, 1,158,620,133 bytes; seven FMOD bank files total 665,721,576 bytes. The largest are music.bank (393,143,808 bytes) and sfx.bank (164,503,840 bytes). Actual GFX loading also uses a shared Gameplay atlas. These are file sizes, not measured downloaded bytes or a room dependency map. Private inspection artifacts remain outside Git; no commercial code or assets are included in this PR.
+
+Reproduce with PowerShell 7:
+
+```powershell
+./scripts/inspect-installation.ps1 -Installation '/path/to/your/Celeste' -Output '/private/path/inventory.json'
+./tests/inspect-installation.test.ps1
+```
+
+The output records assembly references/hash, framework compatibility, Content paths/sizes and explicit dependency coverage. Add -HashContent to read and hash all content and generate a content fingerprint; on a cloud-mounted drive this hydrates the entire installation. The default metadata-only report deliberately has no content fingerprint and cannot certify byte integrity. Existing reports are never overwritten. Saves are excluded.
+
+The inspector tests cover size accounting, unknown-framework rejection, save exclusion, changed-content fingerprint invalidation, metadata-only coverage and preservation of earlier reports. The Smart Download workflow runs frontend, browser and inspector checks without deploying or uploading any user installation.
