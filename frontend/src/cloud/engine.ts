@@ -1,3 +1,4 @@
+import { DownloadScheduler, downloadConcurrency, type NetworkHints } from "./download-scheduler";
 import { GoogleDriveClient, DriveError, sleep } from "./drive";
 import { LocalFileManifest } from "./local";
 import { writerState } from "./writer-state";
@@ -270,14 +271,15 @@ export class SyncEngine {
       const estimate = await navigator.storage.estimate();
       if (estimate.quota && estimate.usage !== undefined && estimate.quota-estimate.usage < bytes * 2) throw new Error("Insufficient browser storage for downloads, staging and backups");
       this.emit({total:paths.size,done:paths.size-downloads.length,totalBytes:bytes,message:this.playing ? "Local changes synchronized; remote updates apply before the next launch" : "Downloading and verifying files"});
-      let cursor = 0;
-      const workers = Array.from({length:Math.max(1,Math.min(6,this.concurrency))},async () => {
-        while (cursor < downloads.length) {
-          const [path,head] = downloads[cursor++]; await this.download(path,head);
+      const connection = (navigator as Navigator & {connection?:NetworkHints}).connection;
+      const scheduler = new DownloadScheduler(downloadConcurrency(connection,this.concurrency));
+      // Every file remains P0 under the full-replica contract. Room priorities
+      // require verified runtime dependencies, not guesses from filenames.
+      const results = await Promise.allSettled(downloads.map(([path,head]) =>
+        scheduler.enqueue(JSON.stringify([this.state.account,this.state.folder,path,head.revision]),0,async()=>{
+          await this.download(path,head);
           this.emit({done:this.progress.done+1});
-        }
-      });
-      const results = await Promise.allSettled(workers);
+        })));
       for (const r of results) if (r.status === "rejected") throw r.reason;
       // Catch writes that raced with our publications, preserving both immutable tips.
       this.revisions = await this.drive.revisions(this.journals);
